@@ -42,7 +42,7 @@ A high-performance, cost-effective system for extracting structured information 
 ### Frontend
 - **HTML5/CSS3/JavaScript** - Modern web UI with drag-and-drop support
 
-## 📦 Installation
+##  Installation
 
 ### Prerequisites
 
