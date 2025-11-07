@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Extractor - Web UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #000000;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #000000;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .pdf-pair {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .pdf-pair:hover {
+            border-color: #333333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .pdf-pair-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .pdf-pair-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .remove-pair-btn {
+            background: #000000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .remove-pair-btn:hover {
+            background: #333333;
+            transform: scale(1.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #000000;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            background: #f5f5f5;
+            border-color: #333333;
+        }
+
+        .file-upload-area.dragover {
+            background: #e0e0e0;
+            border-color: #000000;
+            transform: scale(1.02);
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #000000;
+        }
+
+        .file-upload-text {
+            font-size: 1em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-hint {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .file-selected {
+            margin-top: 12px;
+            padding: 10px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            color: #000000;
+            display: none;
+            font-size: 0.9em;
+        }
+
+        .file-selected.show {
+            display: block;
+        }
+
+        .file-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #999;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-count {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .schema-mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .toggle-btn.active {
+            background: #000000;
+            color: white;
+            border-color: #000000;
+        }
+
+        .schema-editor {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .schema-form {
+            display: none;
+        }
+
+        .schema-form.active {
+            display: block;
+        }
+
+        .schema-field {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .schema-field input {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+
+        .add-field-btn,
+        .remove-field-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.85em;
+        }
+
+        .add-field-btn {
+            background: #000000;
+            color: white;
+        }
+
+        .add-field-btn:hover {
+            background: #333333;
+        }
+
+        .remove-field-btn {
+            background: #000000;
+            color: white;
+        }
+
+        .remove-field-btn:hover {
+            background: #333333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .add-pair-btn,
+        .submit-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .add-pair-btn {
+            background: #000000;
+            color: white;
+        }
+
+        .add-pair-btn:hover {
+            background: #333333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn {
+            background: #000000;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #000000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #000000;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results-header {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #000000;
+        }
+
+        .result-item.error {
+            border-left-color: #666666;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 10px;
+        }
+
+        .result-data {
+            font-family: 'Courier New', monospace;
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9em;
+        }
+
+        .error-message {
+            color: #000000;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e0e0e0;
+            border-radius: 6px;
+        }
+
+        .example-link {
+            color: #000000;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.85em;
+        }
+
+        .example-link:hover {
+            color: #333333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 PDF Extractor</h1>
+            <p>Extract structured data from multiple PDF documents</p>
+        </div>
+
+        <div class="content">
+            <form id="extractionForm">
+                <div id="pdfPairsContainer">
+                    <!-- PDF pairs will be added here dynamically -->
+                </div>
+
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">📋</div>
+                    <p>No PDFs added yet. Click "Add PDF" to get started.</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="add-pair-btn" id="addPairBtn">+ Add PDF</button>
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Extract All PDFs</button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div>Processing PDFs...</div>
+                </div>
+
+                <div class="results" id="results">
+                    <div class="results-header">Extraction Results</div>
+                    <div id="resultsContent"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let pairCounter = 0;
+
+        // Template for a PDF-schema pair
+        function createPDFPair(id) {
+            return `
+                <div class="pdf-pair" data-pair-id="${id}">
+                    <div class="pdf-pair-header">
+                        <div class="pdf-pair-title">PDF #${id}</div>
+                        <button type="button" class="remove-pair-btn" onclick="removePair(${id})">Remove</button>
+                    </div>
+
+                    <!-- PDF Upload -->
+                    <div class="form-group">
+                        <label>PDF File(s) <span style="color: #666; font-weight: normal;">(you can select multiple PDFs with the same schema)</span></label>
+                        <div class="file-upload-area" id="fileUploadArea-${id}" onclick="document.getElementById('pdfFile-${id}').click()">
+                            <div class="file-upload-icon">📎</div>
+                            <div class="file-upload-text">Click to upload or drag and drop</div>
+                            <div class="file-upload-hint">PDF files only (hold Ctrl/Cmd to select multiple)</div>
+                            <input type="file" id="pdfFile-${id}" accept=".pdf" multiple required>
+                            <div class="file-selected" id="fileSelected-${id}">
+                                <div id="fileList-${id}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Label -->
+                    <div class="form-group">
+                        <label>Document Label <span style="color: #666; font-weight: normal;">(e.g., "RG", "fatura", "invoice")</span></label>
+                        <input type="text" id="label-${id}" placeholder="Enter document type label" required>
+                    </div>
+
+                    <!-- Schema Input -->
+                    <div class="form-group">
+                        <label>Extraction Schema</label>
+                        <div class="schema-mode-toggle">
+                            <button type="button" class="toggle-btn active" data-mode="json" data-pair="${id}" onclick="toggleSchemaMode(${id}, 'json')">JSON Editor</button>
+                            <button type="button" class="toggle-btn" data-mode="form" data-pair="${id}" onclick="toggleSchemaMode(${id}, 'form')">Form Builder</button>
+                        </div>
+
+                        <!-- JSON Editor -->
+                        <textarea id="schemaJson-${id}" class="schema-editor" placeholder='{"field_name": "description of what to extract", ...}' required>{
+  "nome": "nome completo da pessoa",
+  "cpf": "número de identificação de pessoa física em formato XXX.XXX.XXX-XX",
+  "data_nascimento": "data de nascimento no formato DD/MM/AAAA"
+}</textarea>
+
+
+                        <!-- Form Builder -->
+                        <div class="schema-form" id="schemaForm-${id}">
+                            <div id="schemaFields-${id}">
+                                <div class="schema-field">
+                                    <input type="text" placeholder="Field name" class="field-name" value="nome">
+                                    <input type="text" placeholder="Field description" class="field-desc" value="nome completo da pessoa">
+                                    <button type="button" class="remove-field-btn" onclick="removeSchemaField(this, ${id})">Remove</button>
+                                </div>
+                                <div class="schema-field">
+                                    <input type="text" placeholder="Field name" class="field-name" value="cpf">
+                                    <input type="text" placeholder="Field description" class="field-desc" value="número de identificação de pessoa física em formato XXX.XXX.XXX-XX">
+                                    <button type="button" class="remove-field-btn" onclick="removeSchemaField(this, ${id})">Remove</button>
+                                </div>
+                                <div class="schema-field">
+                                    <input type="text" placeholder="Field name" class="field-name" value="data_nascimento">
+                                    <input type="text" placeholder="Field description" class="field-desc" value="data de nascimento no formato DD/MM/AAAA">
+                                    <button type="button" class="remove-field-btn" onclick="removeSchemaField(this, ${id})">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-field-btn" onclick="addSchemaField(${id})">Add Field</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize with one pair
+        function init() {
+            addPair();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('addPairBtn').addEventListener('click', addPair);
+            document.getElementById('extractionForm').addEventListener('submit', handleSubmit);
+        }
+
+        function addPair() {
+            pairCounter++;
+            const container = document.getElementById('pdfPairsContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            container.insertAdjacentHTML('beforeend', createPDFPair(pairCounter));
+            emptyState.style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+
+            // Setup file upload for this pair
+            setupFileUpload(pairCounter);
+            
+            // Setup schema sync
+            setupSchemaSync(pairCounter);
+        }
+
+        function removePair(id) {
+            const pair = document.querySelector(`[data-pair-id="${id}"]`);
+            if (pair) {
+                pair.remove();
+            }
+            
+            // Check if no pairs left
+            const container = document.getElementById('pdfPairsContainer');
+            const emptyState = document.getElementById('emptyState');
+            if (container.children.length === 0) {
+                emptyState.style.display = 'block';
+                document.getElementById('submitBtn').disabled = true;
+            }
+        }
+
+        function setupFileUpload(id) {
+            const fileInput = document.getElementById(`pdfFile-${id}`);
+            const fileUploadArea = document.getElementById(`fileUploadArea-${id}`);
+            const fileSelected = document.getElementById(`fileSelected-${id}`);
+            const fileList = document.getElementById(`fileList-${id}`);
+
+            function updateFileDisplay() {
+                const files = fileInput.files;
+                if (files.length > 0) {
+                    let html = `<div class="file-count">✓ ${files.length} file(s) selected:</div>`;
+                    for (let i = 0; i < files.length; i++) {
+                        html += `<div class="file-item">• ${files[i].name}</div>`;
+                    }
+                    fileList.innerHTML = html;
+                    fileSelected.classList.add('show');
+                } else {
+                    fileSelected.classList.remove('show');
+                }
+            }
+
+            fileInput.addEventListener('change', updateFileDisplay);
+
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    // Filter PDF files only
+                    const pdfFiles = Array.from(e.dataTransfer.files).filter(file => 
+                        file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+                    );
+                    
+                    if (pdfFiles.length > 0) {
+                        // Create a new FileList using DataTransfer API (supported in modern browsers)
+                        try {
+                            const dataTransfer = new DataTransfer();
+                            pdfFiles.forEach(file => {
+                                dataTransfer.items.add(file);
+                            });
+                            fileInput.files = dataTransfer.files;
+                            updateFileDisplay();
+                        } catch (error) {
+                            // Fallback: if DataTransfer API doesn't work, use the first PDF file
+                            // This is a limitation in some browsers for programmatically setting multiple files
+                            if (pdfFiles.length === 1) {
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(pdfFiles[0]);
+                                fileInput.files = dataTransfer.files;
+                                updateFileDisplay();
+                            } else {
+                                alert('Multiple file drag-and-drop may not be supported in this browser. Please use the file picker (click) to select multiple files.');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupSchemaSync(id) {
+            const schemaJson = document.getElementById(`schemaJson-${id}`);
+            const schemaFields = document.getElementById(`schemaFields-${id}`);
+
+            schemaJson.addEventListener('input', () => {
+                if (document.querySelector(`.toggle-btn[data-pair="${id}"][data-mode="json"]`).classList.contains('active')) {
+                    updateJsonToForm(id);
+                }
+            });
+        }
+
+        function toggleSchemaMode(id, mode) {
+            const jsonBtn = document.querySelector(`.toggle-btn[data-pair="${id}"][data-mode="json"]`);
+            const formBtn = document.querySelector(`.toggle-btn[data-pair="${id}"][data-mode="form"]`);
+            const schemaJson = document.getElementById(`schemaJson-${id}`);
+            const schemaForm = document.getElementById(`schemaForm-${id}`);
+
+            if (mode === 'json') {
+                jsonBtn.classList.add('active');
+                formBtn.classList.remove('active');
+                schemaJson.style.display = 'block';
+                schemaForm.classList.remove('active');
+            } else {
+                jsonBtn.classList.remove('active');
+                formBtn.classList.add('active');
+                schemaJson.style.display = 'none';
+                schemaForm.classList.add('active');
+                updateJsonToForm(id);
+            }
+        }
+
+        function addSchemaField(id) {
+            const schemaFields = document.getElementById(`schemaFields-${id}`);
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'schema-field';
+            fieldDiv.innerHTML = `
+                <input type="text" placeholder="Field name" class="field-name">
+                <input type="text" placeholder="Field description" class="field-desc">
+                <button type="button" class="remove-field-btn" onclick="removeSchemaField(this, ${id})">Remove</button>
+            `;
+            schemaFields.appendChild(fieldDiv);
+            
+            fieldDiv.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => updateFormToJson(id));
+            });
+            
+            updateFormToJson(id);
+        }
+
+        function removeSchemaField(btn, id) {
+            btn.closest('.schema-field').remove();
+            updateFormToJson(id);
+        }
+
+        function updateFormToJson(id) {
+            const schemaFields = document.getElementById(`schemaFields-${id}`);
+            const schemaJson = document.getElementById(`schemaJson-${id}`);
+            const fields = {};
+            
+            schemaFields.querySelectorAll('.schema-field').forEach(field => {
+                const name = field.querySelector('.field-name').value.trim();
+                const desc = field.querySelector('.field-desc').value.trim();
+                if (name && desc) {
+                    fields[name] = desc;
+                }
+            });
+            
+            schemaJson.value = JSON.stringify(fields, null, 2);
+        }
+
+        function updateJsonToForm(id) {
+            try {
+                const schemaJson = document.getElementById(`schemaJson-${id}`);
+                const schema = JSON.parse(schemaJson.value);
+                const schemaFields = document.getElementById(`schemaFields-${id}`);
+                
+                schemaFields.innerHTML = '';
+                Object.entries(schema).forEach(([name, desc]) => {
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'schema-field';
+                    fieldDiv.innerHTML = `
+                        <input type="text" placeholder="Field name" class="field-name" value="${name}">
+                        <input type="text" placeholder="Field description" class="field-desc" value="${desc}">
+                        <button type="button" class="remove-field-btn" onclick="removeSchemaField(this, ${id})">Remove</button>
+                    `;
+                    schemaFields.appendChild(fieldDiv);
+                    
+                    fieldDiv.querySelectorAll('input').forEach(input => {
+                        input.addEventListener('input', () => updateFormToJson(id));
+                    });
+                });
+            } catch (e) {
+                // Invalid JSON, ignore
+            }
+        }
+
+        function loadExampleSchema(id) {
+            const example = {
+                "nome": "nome completo da pessoa",
+                "cpf": "número de identificação de pessoa física em formato XXX.XXX.XXX-XX",
+                "data_nascimento": "data de nascimento no formato DD/MM/AAAA"
+            };
+            const schemaJson = document.getElementById(`schemaJson-${id}`);
+            schemaJson.value = JSON.stringify(example, null, 2);
+            updateJsonToForm(id);
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const container = document.getElementById('pdfPairsContainer');
+            const pairs = container.querySelectorAll('.pdf-pair');
+            
+            if (pairs.length === 0) {
+                alert('Please add at least one PDF to extract.');
+                return;
+            }
+
+            const pdfFiles = [];
+            const labels = [];
+            const schemas = [];
+
+            // Collect data from all pairs
+            for (const pair of pairs) {
+                const id = pair.dataset.pairId;
+                const fileInput = document.getElementById(`pdfFile-${id}`);
+                const labelInput = document.getElementById(`label-${id}`);
+                const schemaJson = document.getElementById(`schemaJson-${id}`);
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert(`Please select at least one PDF file for PDF #${id}`);
+                    return;
+                }
+
+                if (!labelInput.value.trim()) {
+                    alert(`Please enter a label for PDF #${id}`);
+                    return;
+                }
+
+                let schema;
+                try {
+                    schema = JSON.parse(schemaJson.value);
+                } catch (error) {
+                    alert(`Invalid JSON schema for PDF #${id}. Please check your schema format.`);
+                    return;
+                }
+
+                // Add all files from this pair with the same label and schema
+                const label = labelInput.value.trim();
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    pdfFiles.push(fileInput.files[i]);
+                    labels.push(label);
+                    schemas.push(schema);
+                }
+            }
+
+            // Show loading
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+            results.classList.remove('show');
+
+            // Prepare form data
+            const formData = new FormData();
+            pdfFiles.forEach(file => {
+                formData.append('pdf_files', file);
+            });
+            formData.append('labels', JSON.stringify(labels));
+            formData.append('schemas_json', JSON.stringify(schemas));
+
+            try {
+                const response = await fetch('/extract-batch', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // Display results
+                const resultsContent = document.getElementById('resultsContent');
+                resultsContent.innerHTML = '';
+                
+                if (Array.isArray(data)) {
+                    data.forEach((result, index) => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = `result-item ${result.success ? '' : 'error'}`;
+                        
+                        if (result.success) {
+                            resultDiv.innerHTML = `
+                                <div class="result-label">✓ PDF #${index + 1}: ${result.filename}</div>
+                                <div class="result-label">Label: ${result.label}</div>
+                                <div class="result-data">${JSON.stringify(result.extracted_data, null, 2)}</div>
+                            `;
+                        } else {
+                            resultDiv.innerHTML = `
+                                <div class="result-label">✗ PDF #${index + 1}: ${result.filename}</div>
+                                <div class="error-message">${result.error || 'Unknown error occurred'}</div>
+                            `;
+                        }
+                        
+                        resultsContent.appendChild(resultDiv);
+                    });
+                } else {
+                    resultsContent.innerHTML = `
+                        <div class="result-item error">
+                            <div class="result-label">✗ Error</div>
+                            <div class="error-message">${data.error || 'Unknown error occurred'}</div>
+                        </div>
+                    `;
+                }
+
+                results.classList.add('show');
+            } catch (error) {
+                const resultsContent = document.getElementById('resultsContent');
+                resultsContent.innerHTML = `
+                    <div class="result-item error">
+                        <div class="result-label">✗ Error</div>
+                        <div class="error-message">${error.message}</div>
+                    </div>
+                `;
+                results.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

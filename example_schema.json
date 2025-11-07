@@ -1,0 +1,28 @@
+{
+  "documento1.pdf": {
+    "label": "RG",
+    "schema": {
+      "nome": "nome completo da pessoa",
+      "cpf": "número de identificação de pessoa física em formato XXX.XXX.XXX-XX",
+      "data_nascimento": "data de nascimento no formato DD/MM/AAAA"
+    }
+  },
+  "documento2.pdf": {
+    "label": "RG",
+    "schema": {
+      "nome": "nome completo da pessoa",
+      "numero_rg": "número do documento de identidade",
+      "data_nascimento": "data de nascimento no formato DD/MM/AAAA"
+    }
+  },
+  "documento3.pdf": {
+    "label": "fatura",
+    "schema": {
+      "valor": "valor total da fatura em reais",
+      "data_vencimento": "data de vencimento no formato DD/MM/AAAA",
+      "fornecedor": "nome do fornecedor ou empresa"
+    }
+  }
+}
+
+
