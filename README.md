@@ -12,7 +12,7 @@ A high-performance, cost-effective system for extracting structured information 
 - ✅ **Configurable thresholds**: Adjust confidence levels for your use case
 - ✅ **Cost-effective**: Minimizes LLM API calls by using local models first
 
-## 📋 Technologies
+##  Technologies
 
 ### Backend Framework
 - **FastAPI** (>=0.104.0) - Modern, fast web framework for building APIs
@@ -99,7 +99,7 @@ Configuration settings can be found in `pdf_extractor/config.py`:
 - **EMBEDDING_MODEL** (default: "sentence-transformers/all-MiniLM-L6-v2"): Local embedding model
 - **TOP_K_CANDIDATES** (default: 5): Number of top candidates to consider per field
 
-## 🎯 Usage
+##  Usage
 
 ### 1. Command Line Interface (CLI)
 
@@ -249,7 +249,7 @@ The system includes a beautiful, modern web interface for easy PDF extraction.
 6. Click **"Extract All PDFs"** to process
 7. View results in the results section
 
-## 🏗️ Architecture
+##  Architecture
 
 The system follows a multi-stage extraction pipeline:
 
@@ -312,7 +312,7 @@ Example:
 }
 ```
 
-## 📊 Output Format
+##  Output Format
 
 Results are returned in JSON format:
 
@@ -328,7 +328,7 @@ When using CLI with `--output-dir`, results are saved as:
 - Individual files: `{pdf_name}_results.json`
 - Combined file: `all_results.json`
 
-## 🔧 Development
+##  Development
 
 ### Project Structure
 
@@ -362,7 +362,7 @@ enter_ai/
 # Add test commands here when tests are available
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 
