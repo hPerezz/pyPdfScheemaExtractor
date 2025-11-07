@@ -2,7 +2,7 @@
 
 A high-performance, cost-effective system for extracting structured information from PDF documents. The system uses a multi-stage approach with semantic search and only resorts to LLM (OpenAI) when necessary, making it both accurate and economical.
 
-## 🚀 Features
+##  Features
 
 - ✅ **Multi-stage extraction pipeline**: Regex patterns → Semantic search → LLM fallback
 - ✅ **Smart candidate generation**: Uses embeddings for semantic similarity matching
@@ -381,14 +381,3 @@ enter_ai/
 4. **Port Already in Use**
    - Change the port in `run_api.py` or use: `uvicorn pdf_extractor.api:app --port 8001`
 
-## 📄 License
-
-[Add your license information here]
-
-## 🤝 Contributing
-
-[Add contribution guidelines here]
-
-## 📧 Contact
-
-[Add contact information here]
