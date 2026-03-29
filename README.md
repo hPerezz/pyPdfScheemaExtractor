@@ -53,7 +53,7 @@ A high-performance, cost-effective system for extracting structured information 
 
 ```bash
 git clone <repository-url>
-cd enter_ai
+cd <name>
 ```
 
 ### Step 2: Create a Virtual Environment (Recommended)
